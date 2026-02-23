@@ -1,0 +1,17 @@
+<VRTDataset rasterXSize="10812" rasterYSize="10812">
+  <SRS dataAxisToSRSAxisMapping="2,1">GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101004,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4269"]]</SRS>
+  <GeoTransform> -9.0000555556093389e+01,  9.2592592692201670e-05,  0.0000000000000000e+00,  3.0000555556594520e+01,  0.0000000000000000e+00, -9.2592592775379601e-05</GeoTransform>
+  <VRTRasterBand dataType="Float32" band="1">
+    <NoDataValue>nan</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">data/bluetopo/Louisiana_Bathy\USGS_13_n30w090_20231213.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="10812" RasterYSize="10812" DataType="Float32" BlockXSize="512" BlockYSize="512" />
+      <SrcRect xOff="0" yOff="0" xSize="10812" ySize="10812" />
+      <DstRect xOff="0" yOff="0" xSize="10812" ySize="10812" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <OverviewList resampling="nearest">2 4 8 16 32</OverviewList>
+</VRTDataset>

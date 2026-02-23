@@ -1,0 +1,328 @@
+<VRTDataset rasterXSize="56345" rasterYSize="23133">
+  <SRS dataAxisToSRSAxisMapping="2,1">GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4326"]]</SRS>
+  <GeoTransform> -9.2401677118308029e+01,  5.8714106322987626e-05,  0.0000000000000000e+00,  3.0151601322594637e+01,  0.0000000000000000e+00, -5.8714106322987626e-05</GeoTransform>
+  <VRTRasterBand dataType="Float32" band="1">
+    <NoDataValue>nan</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2FT2KR_20250819_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3951" RasterYSize="3959" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="3951" ySize="3959" />
+      <DstRect xOff="0" yOff="7657.56216427953" xSize="5166.54755640107" ySize="5177.00880176964" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2FV2KR_20250819_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3997" RasterYSize="3976" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="3997" ySize="3976" />
+      <DstRect xOff="5086.33803175795" yOff="7645.86069196769" xSize="5226.86270121003" ySize="5199.40107580962" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2FX2KQ_20250820_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4009" RasterYSize="4022" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4009" ySize="4022" />
+      <DstRect xOff="15332.5432645877" yOff="12733.3128798465" xSize="5228.36801337149" ySize="5245.32206280372" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2FZ2KP_20250813_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4077" RasterYSize="4042" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4077" ySize="4042" />
+      <DstRect xOff="20372.3356798714" yOff="17830.5765415043" xSize="5312.19163238219" ySize="5266.58782881747" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2FZ2KQ_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4074" RasterYSize="4039" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4074" ySize="4039" />
+      <DstRect xOff="20370.979080436" yOff="12720.9555642533" xSize="5314.64009847688" ySize="5268.98167838687" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G22KP_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4102" RasterYSize="4062" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4102" ySize="4062" />
+      <DstRect xOff="25466.9816653285" yOff="17818.810495119" xSize="5342.42804609628" ySize="5290.33220946931" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G22KQ_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3168" RasterYSize="4057" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="3168" ySize="4057" />
+      <DstRect xOff="25464.9883082717" yOff="12774.8070047236" xSize="4062.64928361753" ySize="5202.70459079429" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G42KP_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4084" RasterYSize="4084" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4084" ySize="4084" />
+      <DstRect xOff="30621.0852117123" yOff="17808.5042366621" xSize="5312.72344089829" ySize="5312.72344089829" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G42KQ_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4101" RasterYSize="4059" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4101" ySize="4059" />
+      <DstRect xOff="30591.1845072009" yOff="12698.1798499944" xSize="5344.66593866831" ySize="5289.92905268341" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G52KP_20251204_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4103" RasterYSize="4104" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4103" ySize="4103.64458024041" />
+      <DstRect xOff="35722.9534246436" yOff="17797.8158846694" xSize="5334.34609093731" ySize="5335.18411533061" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G52KQ_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4144" RasterYSize="4054" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4144" ySize="4054" />
+      <DstRect xOff="35656.9196981438" yOff="12686.0771848709" xSize="5402.08224237608" ySize="5284.75902765266" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G52KR_20250706_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4098" RasterYSize="4096" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4098" ySize="4096" />
+      <DstRect xOff="35720.750238134" yOff="7577.21752523069" xSize="5340.14739824306" ySize="5337.54117696525" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G62KQ_20260122_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4122" RasterYSize="4071" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4122" ySize="4071" />
+      <DstRect xOff="40748.3021381118" yOff="12686.0718539934" xSize="5404.28495506536" ySize="5337.41971180763" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G62KR_20251216_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4114" RasterYSize="4021" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4114" ySize="4021" />
+      <DstRect xOff="40748.8386932359" yOff="7632.33950148754" xSize="5405.07256237198" ySize="5282.88691621238" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G62KS_20251216_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3199" RasterYSize="4091" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="3199" ySize="4091" />
+      <DstRect xOff="42026.4970572632" yOff="2495.26450842064" xSize="4130.79548473851" ySize="5282.61466960464" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G72KQ_20260122_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4079" RasterYSize="4055" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4079" ySize="4055" />
+      <DstRect xOff="45873.6382717445" yOff="12698.1155714741" xSize="5344.95623883925" ySize="5313.50761179043" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G72KR_20251216_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4049" RasterYSize="4052" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4049" ySize="4052" />
+      <DstRect xOff="45939.7695662831" yOff="7587.96407781105" xSize="5310.21859226493" ySize="5314.15305899173" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G72KS_20251216_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4093" RasterYSize="4045" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4093" ySize="4045" />
+      <DstRect xOff="45869.5493563975" yOff="2477.31794097087" xSize="5379.93607781957" ySize="5316.8437417005" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G72KT_20250919_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3706" RasterYSize="1062" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="3706" ySize="1062" />
+      <DstRect xOff="45973.1768735325" yOff="1200.33835615186" xSize="5185.61528366051" ySize="1486.00200519359" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G82KS_20260122_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4071" RasterYSize="4029" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="4071" ySize="4029" />
+      <DstRect xOff="50995.1469168176" yOff="2489.46304602018" xSize="5349.77808411464" ySize="5294.58508987911" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BF2G82KT_20260114_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3700" RasterYSize="1045" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="3700" ySize="1045" />
+      <DstRect xOff="51085.6737611362" yOff="1211.1586339128" xSize="5177.95218999799" ySize="1462.42163203997" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4MF57Z_20250214_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2004" RasterYSize="1994" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2004" ySize="1994" />
+      <DstRect xOff="3844.60989470434" yOff="11510.0156383028" xSize="1310.07572791863" ySize="1303.5384238871" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4MF582_20250214_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2004" RasterYSize="1994" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2004" ySize="1994" />
+      <DstRect xOff="3844.38647264844" yOff="10233.0101792238" xSize="1310.48977460301" ySize="1303.95040447026" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4MG582_20231230_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2007" RasterYSize="1996" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2007" ySize="1996" />
+      <DstRect xOff="5121.10396669727" yOff="10232.0796855127" xSize="1312.32389990054" ySize="1305.13129257672" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4MG584_20250819_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2007" RasterYSize="1995" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2007" ySize="1995" />
+      <DstRect xOff="5120.44220028961" yOff="8955.09958128053" xSize="1312.74125482069" ySize="1304.89227870816" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4MH584_20250819_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2009" RasterYSize="1999" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2009" ySize="1999" />
+      <DstRect xOff="6397.37697591412" yOff="8954.29178056563" xSize="1313.87843791035" ySize="1307.33847555142" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4MT57Z_20250815_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2041" RasterYSize="2023" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2041" ySize="2023" />
+      <DstRect xOff="19161.9156842279" yOff="11501.339920732" xSize="1332.70054002511" ySize="1320.94717906457" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4MT582_20250815_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2041" RasterYSize="2023" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2041" ySize="2023" />
+      <DstRect xOff="19161.7090397273" yOff="10223.9519262487" xSize="1333.07527523508" ySize="1321.31860940743" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4N657T_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2067" RasterYSize="2045" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2067" ySize="2045" />
+      <DstRect xOff="29373.2688925417" yOff="16605.7348130809" xSize="1346.850815337" ySize="1332.51568329181" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4N657V_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2067" RasterYSize="2044" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2067" ySize="2044" />
+      <DstRect xOff="29373.3090017906" yOff="15327.9351716098" xSize="1347.26225076912" ySize="1332.270943673" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4N657W_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2067" RasterYSize="2044" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2067" ySize="2044" />
+      <DstRect xOff="29373.402841836" yOff="14050.7642614477" xSize="1347.67665925568" ySize="1332.68074093789" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4N757S_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2071" RasterYSize="2048" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2071" ySize="2048" />
+      <DstRect xOff="30650.2462956338" yOff="17882.0900288971" xSize="1348.92989779592" ySize="1333.94902495705" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4N757T_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2071" RasterYSize="2047" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2071" ySize="2047" />
+      <DstRect xOff="30649.7314914732" yOff="16604.9195151464" xSize="1349.34012132968" ySize="1333.70315227516" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4NC57S_20251204_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2084" RasterYSize="2057" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2084" ySize="2057" />
+      <DstRect xOff="35756.1879547451" yOff="17879.0956099335" xSize="1356.77664070544" ySize="1339.19844046597" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4NC57T_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2083" RasterYSize="2057" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2083" ySize="2057" />
+      <DstRect xOff="35755.8773502896" yOff="16602.0855826818" xSize="1356.48900503472" ySize="1339.55731318119" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4ND57S_20251204_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2086" RasterYSize="2060" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2086" ySize="2060" />
+      <DstRect xOff="37032.2157690025" yOff="17878.7468024754" xSize="1357.90515635339" ySize="1340.98016399232" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4ND57T_20260212_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2086" RasterYSize="2059" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2086" ySize="2059" />
+      <DstRect xOff="37032.1474426247" yOff="16601.1695664401" xSize="1358.31505212394" ySize="1340.73379306002" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4NS58C_20250919_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2049" RasterYSize="2025" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2049" ySize="2025" />
+      <DstRect xOff="52364.7082295811" yOff="0" xSize="1348.06177784462" ySize="1332.27188879226" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4NT58C_20250919_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2045" RasterYSize="2022" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2045" ySize="2022" />
+      <DstRect xOff="53643.2190552348" yOff="0.585276532928226" xSize="1345.34327540387" ySize="1330.2122752404" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">_tile_vrts\BlueTopo_BH4NV58C_20260114_b1_4326.vrt</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2043" RasterYSize="2020" DataType="Float32" BlockXSize="512" BlockYSize="128" />
+      <SrcRect xOff="0" yOff="0" xSize="2043" ySize="2020" />
+      <DstRect xOff="54921.7645579057" yOff="1.27540062428373" xSize="1343.94713940361" ySize="1328.81704434425" />
+      <NODATA>nan</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>
