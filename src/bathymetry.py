@@ -178,7 +178,7 @@ class BathymetryGrid:
         for ds in datasets:
             ds.close()
 
-    def get_static_depth_mllw_ft(self, navd88_to_mllw_offset_ft: float) -> np.ndarray:
+    def get_static_depth_mllw_ft(self, navd88_to_mllw_offset) -> np.ndarray:
         """
         Convert NAVD88 elevation to depth of water at MLLW, in feet.
 
@@ -188,15 +188,16 @@ class BathymetryGrid:
             elev_ft = elevation_m * 3.28084
             depth_below_mllw = -(elev_ft + offset)
 
-        Example: -1.0 m NAVD88 = -3.28 ft, offset = -0.63 ft
-            depth = -(-3.28 + (-0.63)) = 3.91 ft of water at MLLW
+        Args:
+            navd88_to_mllw_offset: Float constant, or a 2D np.ndarray grid 
+                                   of spatial VDatum offsets.
 
         Returns:
             2D array of water depth in feet at MLLW.
             Positive = water.  NaN = no survey data.
         """
         elev_ft = self.elevation_m * 3.28084
-        depth = -(elev_ft + navd88_to_mllw_offset_ft)
+        depth = -(elev_ft + navd88_to_mllw_offset)
         return depth
 
     def get_grid_bounds_latlon(self):

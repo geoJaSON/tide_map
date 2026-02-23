@@ -6,7 +6,6 @@ to the depth_forecasts table.
 """
 
 import os
-import base64
 from datetime import date, datetime, timedelta
 from typing import Dict, Optional
 
@@ -39,14 +38,16 @@ def ensure_bucket(client: Client):
 def upload_image(
     client: Client,
     forecast_date: date,
+    forecast_hour: int,
     png_bytes: bytes,
 ) -> str:
     """
     Upload a PNG to Supabase Storage.
 
+    Filename format: 2026-02-23_07.png, 2026-02-23_12.png, etc.
     Returns the public URL for the image.
     """
-    filename = f"{forecast_date.isoformat()}.png"
+    filename = f"{forecast_date.isoformat()}_{forecast_hour:02d}.png"
 
     # Remove existing file if present (upsert)
     try:
@@ -67,27 +68,27 @@ def upload_image(
 def upsert_forecast(
     client: Client,
     forecast_date: date,
+    forecast_hour: int,
     image_url: str,
     bounds: Dict,
-    effective_low_ft: float,
+    effective_level_ft: float,
     tide_ft: float,
     setdown_ft: float,
-    worst_hour: Optional[datetime],
 ):
     """Upsert a row in the depth_forecasts table."""
     row = {
         "forecast_date": forecast_date.isoformat(),
+        "forecast_hour": forecast_hour,
         "image_url": image_url,
         "bounds": bounds,
-        "effective_low_ft": round(effective_low_ft, 2),
+        "effective_level_ft": round(effective_level_ft, 2),
         "tide_ft": round(tide_ft, 2),
         "setdown_ft": round(setdown_ft, 2),
-        "worst_hour": worst_hour.isoformat() if worst_hour else None,
         "updated_at": datetime.utcnow().isoformat(),
     }
 
     client.table("depth_forecasts").upsert(
-        row, on_conflict="forecast_date"
+        row, on_conflict="forecast_date,forecast_hour"
     ).execute()
 
 
@@ -98,17 +99,20 @@ def delete_old_forecasts(client: Client, keep_days: int = 14):
     # Get old rows to find their image filenames
     result = (
         client.table("depth_forecasts")
-        .select("forecast_date")
+        .select("forecast_date, forecast_hour")
         .lt("forecast_date", cutoff)
         .execute()
     )
 
-    old_dates = [r["forecast_date"] for r in (result.data or [])]
-    if not old_dates:
+    old_rows = result.data or []
+    if not old_rows:
         return
 
     # Delete images from storage
-    filenames = [f"{d}.png" for d in old_dates]
+    filenames = [
+        f"{r['forecast_date']}_{r['forecast_hour']:02d}.png"
+        for r in old_rows
+    ]
     try:
         client.storage.from_(BUCKET).remove(filenames)
     except Exception:
@@ -119,4 +123,5 @@ def delete_old_forecasts(client: Client, keep_days: int = 14):
         "forecast_date", cutoff
     ).execute()
 
-    print(f"  Cleaned up {len(old_dates)} old forecast(s)")
+    n_dates = len(set(r["forecast_date"] for r in old_rows))
+    print(f"  Cleaned up {n_dates} old forecast day(s) ({len(old_rows)} snapshots)")

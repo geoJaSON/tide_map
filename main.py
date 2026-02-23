@@ -3,7 +3,7 @@ South Louisiana Navigable Depth Predictor
 
 Combines bathymetry, tide predictions from multiple NOAA stations,
 and wind forecasts to produce a color-coded map showing where boats
-can safely navigate.
+can safely navigate.  Generates snapshots at 7 AM, 12 PM, and 5 PM.
 
 Usage:
     python main.py                         # 7-day forecast
@@ -25,7 +25,6 @@ import numpy as np
 from config import (
     BOUNDS,
     TIDE_STATIONS,
-    NAVD88_TO_MLLW_OFFSET_FT,
     SETDOWN_COEFF,
     WIND_FORECAST_LAT,
     WIND_FORECAST_LON,
@@ -37,7 +36,7 @@ from config import (
     IDW_POWER,
     IDW_COARSE_RES,
     MAX_GRID_DIM,
-    WORK_HOURS,
+    SNAPSHOT_HOURS,
 )
 from src.bathymetry import BathymetryGrid
 from src.tides import TideClient
@@ -76,13 +75,8 @@ def main():
         print(f"\n  ERROR: {e}")
         sys.exit(1)
 
-    static_depth = bathy.get_static_depth_mllw_ft(NAVD88_TO_MLLW_OFFSET_FT)
-    total_cells = static_depth.size
-    nan_cells = np.isnan(static_depth).sum()
-    nan_pct = nan_cells / total_cells * 100 if total_cells > 0 else 0
-
+    # Delay static_depth calculation until we build the VDatum offset grid
     print(f"  Grid: {bathy.shape[1]} x {bathy.shape[0]} pixels")
-    print(f"  Data coverage: {100 - nan_pct:.0f}%  ({nan_pct:.0f}% no-data)")
 
     # ------------------------------------------------------------------
     # Step 2: Fetch tide predictions from all stations
@@ -109,6 +103,20 @@ def main():
     tide_builder = TideGridBuilder(
         active_stations, bathy.shape, BOUNDS, IDW_POWER, IDW_COARSE_RES
     )
+
+    # ------------------------------------------------------------------
+    # Step 2b: Apply VDatum offsets
+    # ------------------------------------------------------------------
+    print("\n[2b/5] Building spatial VDatum offset grid...")
+    vdatum_offsets = {sid: info["vdatum_offset"] for sid, info in active_stations.items()}
+    vdatum_grid = tide_builder.build_tide_grid(vdatum_offsets)
+    
+    static_depth = bathy.get_static_depth_mllw_ft(vdatum_grid)
+    
+    total_cells = static_depth.size
+    nan_cells = np.isnan(static_depth).sum()
+    nan_pct = nan_cells / total_cells * 100 if total_cells > 0 else 0
+    print(f"  Data coverage: {100 - nan_pct:.0f}%  ({nan_pct:.0f}% no-data)")
 
     # ------------------------------------------------------------------
     # Step 3: Fetch wind forecast
@@ -148,24 +156,25 @@ def main():
         print(f"  Max set-up:   {best['setdown_ft']:+.1f} ft at {best['time'].strftime('%a %I %p')}")
 
     # ------------------------------------------------------------------
-    # Step 5: Compute depth grids and generate map
+    # Step 5: Compute snapshot depth grids and generate map
     # ------------------------------------------------------------------
-    print(f"\n[5/5] Generating forecast map (work hours {WORK_HOURS[0]:02d}:00–{WORK_HOURS[1]:02d}:00)...")
+    hours_label = ", ".join(f"{h}:00" for h in SNAPSHOT_HOURS)
+    print(f"\n[5/5] Generating forecast map (snapshots at {hours_label})...")
     calculator = DepthCalculator(static_depth, tide_grid_builder=tide_builder)
     target_dates = [now + timedelta(days=d) for d in range(args.days)]
-    summaries = calculator.compute_daily_summaries(
-        multi_preds, setdown_series, target_dates, work_hours=WORK_HOURS
+    snapshots = calculator.compute_snapshots(
+        multi_preds, setdown_series, target_dates, snapshot_hours=SNAPSHOT_HOURS
     )
 
-    if not summaries:
-        print("\n  ERROR: No daily summaries could be computed.")
+    if not snapshots:
+        print("\n  ERROR: No snapshots could be computed.")
         print("  Check that tide predictions and wind forecasts have overlapping dates.")
         sys.exit(1)
 
     # Build the map
     grid_bounds = bathy.get_grid_bounds_latlon()
     builder = MapBuilder(MAP_CENTER, MAP_ZOOM)
-    m = builder.build_multi_day_map(summaries, grid_bounds)
+    m = builder.build_snapshot_map(snapshots, grid_bounds)
 
     # Save output
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
@@ -179,19 +188,23 @@ def main():
     # ------------------------------------------------------------------
     # Print summary table
     # ------------------------------------------------------------------
+    n_dates = len(set(s["date"] for s in snapshots))
     print(f"\n{'=' * 62}")
-    print(f"  {'Date':<12} {'Tide Low':>10} {'Setdown':>10} {'Eff Low':>10}")
+    print(f"  {'Date':<12} {'Hour':>6} {'Tide':>8} {'Wind':>8} {'Eff':>8}")
     print(f"  {'-' * 50}")
-    for s in summaries:
-        eff_low = s["tide_at_min"] + s["setdown_at_min"]
+    for s in snapshots:
+        eff = s["tide_ft"] + s["setdown_ft"]
+        time_label = s["time"].strftime("%I %p").lstrip("0")
         print(
             f"  {s['date'].strftime('%a %m/%d'):<12}"
-            f"{s['tide_at_min']:>+8.1f} ft"
-            f"{s['setdown_at_min']:>+8.1f} ft"
-            f"{eff_low:>+8.1f} ft"
+            f"{time_label:>6}"
+            f"{s['tide_ft']:>+7.1f}'"
+            f"{s['setdown_ft']:>+7.1f}'"
+            f"{eff:>+7.1f}'"
         )
     print(f"{'=' * 62}")
-    print(f"\n  Map saved to: {out_path}")
+    print(f"\n  {len(snapshots)} snapshots across {n_dates} day(s)")
+    print(f"  Map saved to: {out_path}")
     print(f"  Open in any browser to view.\n")
 
 

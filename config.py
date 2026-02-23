@@ -23,13 +23,13 @@ BOUNDS = {
 # ---------------------------------------------------------------------------
 TIDE_STATIONS = {
     # Terrebonne / Caillou
-    "8762075": {"name": "Port Fourchon, Belle Pass",    "lat": 29.1142, "lon": -90.1993},
+    "8762075": {"name": "Port Fourchon, Belle Pass",    "lat": 29.1142, "lon": -90.1993, "vdatum_offset": -0.63},
     # Barataria / Plaquemines
-    "8761724": {"name": "Grand Isle",                   "lat": 29.2633, "lon": -89.9572},
-    "8760721": {"name": "Pilottown",                    "lat": 29.1793, "lon": -89.2585},
-    "8760922": {"name": "Pilots Station East, SW Pass", "lat": 28.9322, "lon": -89.4075},
+    "8761724": {"name": "Grand Isle",                   "lat": 29.2633, "lon": -89.9572, "vdatum_offset": -0.55},
+    "8760721": {"name": "Pilottown",                    "lat": 29.1793, "lon": -89.2585, "vdatum_offset": -0.45},
+    "8760922": {"name": "Pilots Station East, SW Pass", "lat": 28.9322, "lon": -89.4075, "vdatum_offset": -0.40},
     # St. Bernard / Breton Sound
-    "8761305": {"name": "Shell Beach",                  "lat": 29.8683, "lon": -89.6731},
+    "8761305": {"name": "Shell Beach",                  "lat": 29.8683, "lon": -89.6731, "vdatum_offset": -0.35},
 }
 
 # ---------------------------------------------------------------------------
@@ -46,29 +46,21 @@ IDW_COARSE_RES = 300   # Max dimension of coarse interpolation grid
 # is downsampled to 2000 px anyway, so 5000 px gives plenty of headroom.
 MAX_GRID_DIM = 5000
 
-# ---------------------------------------------------------------------------
-# Datum conversion
-# ---------------------------------------------------------------------------
-# BlueTopo elevations are NAVD88 (meters, negative = underwater).
-# NOAA tides are relative to MLLW (feet).
-#
-# At Port Fourchon the NAVD88-to-MLLW offset is approximately -0.63 ft,
-# meaning NAVD88 zero sits about 0.63 ft ABOVE MLLW zero.
-# This value varies slightly along the coast but is a reasonable average
-# for the Louisiana bight.  Refine with NOAA VDatum if needed.
-NAVD88_TO_MLLW_OFFSET_FT = -0.63
+# For backward compatibility, keep comments mostly the same but remove constant.
+# We now dynamically build a VDatum offset grid interpolating per-station offsets.
+# NAVD88_TO_MLLW_OFFSET_FT is no longer used.
 
 # ---------------------------------------------------------------------------
 # Depth thresholds (feet)
 # ---------------------------------------------------------------------------
-MIN_NAVIGABLE_DEPTH_FT = 3.0   # Red below this — cannot navigate
+MIN_NAVIGABLE_DEPTH_FT = 2.0   # Red below this — cannot navigate
 CAUTION_DEPTH_FT = 4.0         # Yellow between MIN and this — use caution
 
 # ---------------------------------------------------------------------------
-# Working hours — only consider conditions during this window.
-# Uses 24-hour local time.  Set to (0, 24) for round-the-clock.
+# Snapshot hours — depth grids are generated at these times each day.
+# Uses 24-hour local time.
 # ---------------------------------------------------------------------------
-WORK_HOURS = (5, 19)   # 5 AM – 7 PM
+SNAPSHOT_HOURS = [7, 12, 17]   # 7 AM, 12 PM, 5 PM
 
 # ---------------------------------------------------------------------------
 # Wind setdown model
@@ -77,7 +69,7 @@ WORK_HOURS = (5, 19)   # 5 AM – 7 PM
 # Calibrated so a 20 mph due-north wind produces ~1.2 ft of setdown.
 #   1.2 / (20^2) = 0.003
 # Increase if you observe more setdown than predicted; decrease if less.
-SETDOWN_COEFF = 0.003
+SETDOWN_COEFF = 0.005
 
 # ---------------------------------------------------------------------------
 # NWS wind forecast location (center of work area)

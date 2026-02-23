@@ -2,8 +2,9 @@
 Push depth forecast images to Supabase.
 
 Runs the full forecast pipeline with multi-station IDW tide
-interpolation, generates a PNG overlay for each day, uploads to
-Supabase Storage, and upserts metadata to the depth_forecasts table.
+interpolation, generates a PNG overlay for each snapshot hour
+(7 AM, 12 PM, 5 PM) per day, uploads to Supabase Storage, and
+upserts metadata to the depth_forecasts table.
 
 Usage:
     python push_forecast.py             # 7-day forecast
@@ -23,7 +24,6 @@ import numpy as np
 from config import (
     BOUNDS,
     TIDE_STATIONS,
-    NAVD88_TO_MLLW_OFFSET_FT,
     SETDOWN_COEFF,
     WIND_FORECAST_LAT,
     WIND_FORECAST_LON,
@@ -37,7 +37,7 @@ from config import (
     IDW_POWER,
     IDW_COARSE_RES,
     MAX_GRID_DIM,
-    WORK_HOURS,
+    SNAPSHOT_HOURS,
 )
 from src.bathymetry import BathymetryGrid
 from src.tides import TideClient
@@ -80,7 +80,7 @@ def main():
         print(f"\n  ERROR: {e}")
         sys.exit(1)
 
-    static_depth = bathy.get_static_depth_mllw_ft(NAVD88_TO_MLLW_OFFSET_FT)
+    # Delay static_depth calculation until we build the VDatum offset grid
     print(f"  Grid: {bathy.shape[1]} x {bathy.shape[0]} pixels")
 
     # ------------------------------------------------------------------
@@ -109,6 +109,14 @@ def main():
     )
 
     # ------------------------------------------------------------------
+    # Step 2b: Apply VDatum offsets
+    # ------------------------------------------------------------------
+    print("\n[2b/6] Building spatial VDatum offset grid...")
+    vdatum_offsets = {sid: info["vdatum_offset"] for sid, info in active_stations.items()}
+    vdatum_grid = tide_builder.build_tide_grid(vdatum_offsets)
+    static_depth = bathy.get_static_depth_mllw_ft(vdatum_grid)
+
+    # ------------------------------------------------------------------
     # Step 3: Fetch wind forecast
     # ------------------------------------------------------------------
     print("\n[3/6] Fetching wind forecast...")
@@ -128,23 +136,25 @@ def main():
         print(f"  Got {len(wind_forecast)} hourly forecasts")
 
     # ------------------------------------------------------------------
-    # Step 4: Compute setdown + depth grids
+    # Step 4: Compute snapshot depth grids
     # ------------------------------------------------------------------
-    print("\n[4/6] Computing depth grids...")
+    hours_label = ", ".join(f"{h}:00" for h in SNAPSHOT_HOURS)
+    print(f"\n[4/6] Computing depth snapshots ({hours_label})...")
     setdown_model = WindSetdownModel(coeff=SETDOWN_COEFF)
     setdown_series = setdown_model.calculate_setdown_timeseries(wind_forecast)
 
     calculator = DepthCalculator(static_depth, tide_grid_builder=tide_builder)
     target_dates = [now + timedelta(days=d) for d in range(args.days)]
-    summaries = calculator.compute_daily_summaries(
-        multi_preds, setdown_series, target_dates, work_hours=WORK_HOURS
+    snapshots = calculator.compute_snapshots(
+        multi_preds, setdown_series, target_dates, snapshot_hours=SNAPSHOT_HOURS
     )
 
-    if not summaries:
-        print("  ERROR: No daily summaries could be computed.")
+    if not snapshots:
+        print("  ERROR: No snapshots could be computed.")
         sys.exit(1)
 
-    print(f"  Generated {len(summaries)} daily forecast(s)")
+    n_dates = len(set(s["date"] for s in snapshots))
+    print(f"  Generated {len(snapshots)} snapshots across {n_dates} day(s)")
 
     # ------------------------------------------------------------------
     # Step 5: Upload to Supabase
@@ -160,33 +170,35 @@ def main():
         "east": BOUNDS["east"],
     }
 
-    for summary in summaries:
-        d = summary["date"]
-        eff_low = summary["tide_at_min"] + summary["setdown_at_min"]
+    for snap in snapshots:
+        d = snap["date"]
+        h = snap["hour"]
+        eff_level = snap["tide_ft"] + snap["setdown_ft"]
 
         # Generate PNG
         png_bytes = depth_grid_to_png(
-            summary["min_depth_grid"],
+            snap["depth_grid"],
             no_go=MIN_NAVIGABLE_DEPTH_FT,
             caution=CAUTION_DEPTH_FT,
         )
 
         # Upload image
-        image_url = upload_image(client, d, png_bytes)
+        image_url = upload_image(client, d, h, png_bytes)
 
         # Upsert metadata
         upsert_forecast(
             client,
             forecast_date=d,
+            forecast_hour=h,
             image_url=image_url,
             bounds=bounds_dict,
-            effective_low_ft=eff_low,
-            tide_ft=summary["tide_at_min"],
-            setdown_ft=summary["setdown_at_min"],
-            worst_hour=summary["min_depth_hour"],
+            effective_level_ft=eff_level,
+            tide_ft=snap["tide_ft"],
+            setdown_ft=snap["setdown_ft"],
         )
 
-        print(f"  {d.strftime('%a %m/%d')}: eff low {eff_low:+.1f} ft → uploaded")
+        time_label = snap["time"].strftime("%I %p").lstrip("0")
+        print(f"  {d.strftime('%a %m/%d')} {time_label}: eff {eff_level:+.1f} ft → uploaded")
 
     # ------------------------------------------------------------------
     # Step 6: Cleanup old data
@@ -201,7 +213,7 @@ def main():
         print("\n  Generating local HTML map...")
         grid_bounds = bathy.get_grid_bounds_latlon()
         builder = MapBuilder(MAP_CENTER, MAP_ZOOM)
-        m = builder.build_multi_day_map(summaries, grid_bounds)
+        m = builder.build_snapshot_map(snapshots, grid_bounds)
         Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
         out_path = Path(OUTPUT_DIR) / f"depth_forecast_{now.strftime('%Y%m%d')}.html"
         builder.save(m, str(out_path))
@@ -209,11 +221,18 @@ def main():
 
     # Summary
     print(f"\n{'=' * 62}")
-    print(f"  {'Date':<12} {'Eff Low':>10}  {'Image'}")
-    print(f"  {'-' * 55}")
-    for s in summaries:
-        eff = s["tide_at_min"] + s["setdown_at_min"]
-        print(f"  {s['date'].strftime('%a %m/%d'):<12}{eff:>+8.1f} ft  ✓ uploaded")
+    print(f"  {'Date':<12} {'Hour':>6} {'Tide':>8} {'Wind':>8} {'Eff':>8}")
+    print(f"  {'-' * 50}")
+    for s in snapshots:
+        eff = s["tide_ft"] + s["setdown_ft"]
+        time_label = s["time"].strftime("%I %p").lstrip("0")
+        print(
+            f"  {s['date'].strftime('%a %m/%d'):<12}"
+            f"{time_label:>6}"
+            f"{s['tide_ft']:>+7.1f}'"
+            f"{s['setdown_ft']:>+7.1f}'"
+            f"{eff:>+7.1f}'"
+        )
     print(f"{'=' * 62}\n")
 
 
