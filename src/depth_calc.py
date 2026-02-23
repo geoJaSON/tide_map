@@ -59,6 +59,7 @@ class DepthCalculator:
         multi_predictions: Dict[str, List[Dict]],
         setdown_series: List[Dict],
         target_dates: List,
+        work_hours: tuple = (0, 24),
     ) -> List[Dict]:
         """
         For each target date, compute worst-case (minimum) depth grid.
@@ -69,6 +70,9 @@ class DepthCalculator:
                                mode, pass a dict with one key.
             setdown_series:    [{"time": dt, "setdown_ft": float}]
             target_dates:      list of date or datetime objects
+            work_hours:        (start, end) in 24-hour local time.
+                               Only hours within this window are considered.
+                               Default (0, 24) uses all hours.
 
         Returns list of:
         {
@@ -88,6 +92,7 @@ class DepthCalculator:
           not the hour when the single shallowest pixel is lowest.
         - Calendar day: Uses the date of each hour in local (naive) time.
         """
+        wh_start, wh_end = work_hours
         # Build lookup of setdown by hour
         setdown_by_hour = {}
         setdown_times = []
@@ -126,8 +131,11 @@ class DepthCalculator:
             else:
                 d = target_date
 
-            # Filter hours for this calendar day
-            day_hours = sorted([h for h in all_hours if h.date() == d])
+            # Filter hours for this calendar day within the work window
+            day_hours = sorted([
+                h for h in all_hours
+                if h.date() == d and wh_start <= h.hour < wh_end
+            ])
             if not day_hours:
                 continue
 

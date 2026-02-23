@@ -50,6 +50,13 @@ Each day's forecast shows the **per-pixel minimum depth** across all 24 hours �
 | Green | ≥ 4 ft | Safe |
 | Gray | — | No survey data |
 
+### Accuracy considerations
+
+- **Tide–wind hour alignment**: Tide predictions are hourly from midnight (NOAA); NWS wind can start at the current hour. Hours with tide but no wind used to be treated as zero setdown; the code now uses the **nearest available** wind setdown for such hours to avoid assuming calm.
+- **Worst hour**: The time shown as “worst” is the hour when **average** depth over the grid is lowest, not necessarily when the shallowest pixel is at its minimum.
+- **Timezone**: Tides use NOAA `lst_ldt`; wind uses NWS local time (naive). If NOAA applies no DST to predictions, a 1-hour offset is possible in summer; worth verifying against a known event.
+- **Wind setdown**: Empirical coefficient (0.003) is unvalidated in-repo; Phase 2 regression on observed vs predicted residuals would improve reliability.
+
 ### Tide Station Coverage
 
 Predictions are fetched from 5 NOAA CO-OPS stations spanning the coverage area:

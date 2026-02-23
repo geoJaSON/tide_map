@@ -37,6 +37,7 @@ from config import (
     IDW_POWER,
     IDW_COARSE_RES,
     MAX_GRID_DIM,
+    WORK_HOURS,
 )
 from src.bathymetry import BathymetryGrid
 from src.tides import TideClient
@@ -136,7 +137,7 @@ def main():
     calculator = DepthCalculator(static_depth, tide_grid_builder=tide_builder)
     target_dates = [now + timedelta(days=d) for d in range(args.days)]
     summaries = calculator.compute_daily_summaries(
-        multi_preds, setdown_series, target_dates
+        multi_preds, setdown_series, target_dates, work_hours=WORK_HOURS
     )
 
     if not summaries:

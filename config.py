@@ -65,6 +65,12 @@ MIN_NAVIGABLE_DEPTH_FT = 3.0   # Red below this — cannot navigate
 CAUTION_DEPTH_FT = 4.0         # Yellow between MIN and this — use caution
 
 # ---------------------------------------------------------------------------
+# Working hours — only consider conditions during this window.
+# Uses 24-hour local time.  Set to (0, 24) for round-the-clock.
+# ---------------------------------------------------------------------------
+WORK_HOURS = (5, 19)   # 5 AM – 7 PM
+
+# ---------------------------------------------------------------------------
 # Wind setdown model
 # ---------------------------------------------------------------------------
 # Empirical coefficient: feet of setdown per (mph)^2 of north-wind component.
