@@ -63,13 +63,14 @@ CAUTION_DEPTH_FT = 4.0         # Yellow between MIN and this — use caution
 SNAPSHOT_HOURS = [7, 12, 17]   # 7 AM, 12 PM, 5 PM
 
 # ---------------------------------------------------------------------------
-# Wind setdown model
+# Wind setup/setdown model (USACE wind stress)
 # ---------------------------------------------------------------------------
-# Empirical coefficient: feet of setdown per (mph)^2 of north-wind component.
-# Calibrated so a 20 mph due-north wind produces ~1.2 ft of setdown.
-#   1.2 / (20^2) = 0.003
-# Increase if you observe more setdown than predicted; decrease if less.
-SETDOWN_COEFF = 0.005
+# Uses a 4-band fetch raster (N, E, S, W) with S = Cd × U² × F / (g × d)
+# to compute spatially varying wind-driven water level changes.
+# avg_depth_ft is the representative average basin depth.
+# Drag coefficient (Cd = 2.5e-6) is set in WindSetupModel.DRAG_COEFF.
+FETCH_RASTER_PATH = "data/fetch/fetch_4dir.tif"
+SIBUL_AVG_DEPTH_FT = 5.0
 
 # ---------------------------------------------------------------------------
 # NWS wind forecast location (center of work area)

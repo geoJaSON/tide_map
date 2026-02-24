@@ -31,7 +31,7 @@ def depth_grid_to_png(
         Gray  (128, 128, 128, 80) — NaN (no survey data)
 
     Large grids are downsampled to max_width using nearest-neighbor
-    on the classified image (preserves worst-case classification).
+    on the classified image (preserves color boundaries).
 
     Returns raw PNG bytes.
     """

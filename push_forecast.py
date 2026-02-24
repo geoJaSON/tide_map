@@ -2,9 +2,9 @@
 Push depth forecast images to Supabase.
 
 Runs the full forecast pipeline with multi-station IDW tide
-interpolation, generates a PNG overlay for each snapshot hour
-(7 AM, 12 PM, 5 PM) per day, uploads to Supabase Storage, and
-upserts metadata to the depth_forecasts table.
+interpolation and Sibul wind setdown, generates a PNG overlay
+for each snapshot hour (7 AM, 12 PM, 5 PM) per day, uploads to
+Supabase Storage, and upserts metadata to the depth_forecasts table.
 
 Usage:
     python push_forecast.py             # 7-day forecast
@@ -24,7 +24,8 @@ import numpy as np
 from config import (
     BOUNDS,
     TIDE_STATIONS,
-    SETDOWN_COEFF,
+    FETCH_RASTER_PATH,
+    SIBUL_AVG_DEPTH_FT,
     WIND_FORECAST_LAT,
     WIND_FORECAST_LON,
     BLUETOPO_DIR,
@@ -42,7 +43,7 @@ from config import (
 from src.bathymetry import BathymetryGrid
 from src.tides import TideClient
 from src.wind import WindForecastClient
-from src.setdown import WindSetdownModel
+from src.setdown import load_fetch_grids, SibulSetdownModel
 from src.tide_grid import TideGridBuilder
 from src.depth_calc import DepthCalculator
 from src.map_builder import MapBuilder, depth_grid_to_png
@@ -73,20 +74,19 @@ def main():
     # ------------------------------------------------------------------
     # Step 1: Load bathymetry
     # ------------------------------------------------------------------
-    print("\n[1/6] Loading bathymetry...")
+    print("\n[1/7] Loading bathymetry...")
     try:
         bathy = BathymetryGrid(BLUETOPO_DIR, BOUNDS, max_dim=MAX_GRID_DIM)
     except FileNotFoundError as e:
         print(f"\n  ERROR: {e}")
         sys.exit(1)
 
-    # Delay static_depth calculation until we build the VDatum offset grid
     print(f"  Grid: {bathy.shape[1]} x {bathy.shape[0]} pixels")
 
     # ------------------------------------------------------------------
     # Step 2: Fetch tide predictions from all stations
     # ------------------------------------------------------------------
-    print("\n[2/6] Fetching tide predictions...")
+    print("\n[2/7] Fetching tide predictions...")
     tides = TideClient(CACHE_DIR)
     now = datetime.now()
 
@@ -111,15 +111,27 @@ def main():
     # ------------------------------------------------------------------
     # Step 2b: Apply VDatum offsets
     # ------------------------------------------------------------------
-    print("\n[2b/6] Building spatial VDatum offset grid...")
+    print("\n[2b/7] Building spatial VDatum offset grid...")
     vdatum_offsets = {sid: info["vdatum_offset"] for sid, info in active_stations.items()}
     vdatum_grid = tide_builder.build_tide_grid(vdatum_offsets)
     static_depth = bathy.get_static_depth_mllw_ft(vdatum_grid)
 
     # ------------------------------------------------------------------
-    # Step 3: Fetch wind forecast
+    # Step 3: Load fetch raster
     # ------------------------------------------------------------------
-    print("\n[3/6] Fetching wind forecast...")
+    print("\n[3/7] Loading fetch raster...")
+    fetch_path = Path(FETCH_RASTER_PATH)
+    if not fetch_path.exists():
+        print(f"  ERROR: Fetch raster not found: {FETCH_RASTER_PATH}")
+        sys.exit(1)
+
+    fetch_grids = load_fetch_grids(str(fetch_path), BOUNDS, bathy.shape)
+    setdown_model = SibulSetdownModel(fetch_grids, avg_depth_ft=SIBUL_AVG_DEPTH_FT)
+
+    # ------------------------------------------------------------------
+    # Step 4: Fetch wind forecast
+    # ------------------------------------------------------------------
+    print("\n[4/7] Fetching wind forecast...")
     wind_client = WindForecastClient()
     wind_forecast = wind_client.get_hourly_wind_forecast(
         WIND_FORECAST_LAT, WIND_FORECAST_LON
@@ -136,17 +148,19 @@ def main():
         print(f"  Got {len(wind_forecast)} hourly forecasts")
 
     # ------------------------------------------------------------------
-    # Step 4: Compute snapshot depth grids
+    # Step 5: Compute snapshot depth grids
     # ------------------------------------------------------------------
     hours_label = ", ".join(f"{h}:00" for h in SNAPSHOT_HOURS)
-    print(f"\n[4/6] Computing depth snapshots ({hours_label})...")
-    setdown_model = WindSetdownModel(coeff=SETDOWN_COEFF)
-    setdown_series = setdown_model.calculate_setdown_timeseries(wind_forecast)
+    print(f"\n[5/7] Computing depth snapshots ({hours_label})...")
 
-    calculator = DepthCalculator(static_depth, tide_grid_builder=tide_builder)
+    calculator = DepthCalculator(
+        static_depth,
+        tide_grid_builder=tide_builder,
+        setdown_model=setdown_model,
+    )
     target_dates = [now + timedelta(days=d) for d in range(args.days)]
     snapshots = calculator.compute_snapshots(
-        multi_preds, setdown_series, target_dates, snapshot_hours=SNAPSHOT_HOURS
+        multi_preds, wind_forecast, target_dates, snapshot_hours=SNAPSHOT_HOURS
     )
 
     if not snapshots:
@@ -157,9 +171,9 @@ def main():
     print(f"  Generated {len(snapshots)} snapshots across {n_dates} day(s)")
 
     # ------------------------------------------------------------------
-    # Step 5: Upload to Supabase
+    # Step 6: Upload to Supabase
     # ------------------------------------------------------------------
-    print("\n[5/6] Uploading to Supabase...")
+    print("\n[6/7] Uploading to Supabase...")
     client = _get_client()
     ensure_bucket(client)
 
@@ -201,9 +215,9 @@ def main():
         print(f"  {d.strftime('%a %m/%d')} {time_label}: eff {eff_level:+.1f} ft → uploaded")
 
     # ------------------------------------------------------------------
-    # Step 6: Cleanup old data
+    # Step 7: Cleanup old data
     # ------------------------------------------------------------------
-    print("\n[6/6] Cleaning up...")
+    print("\n[7/7] Cleaning up...")
     delete_old_forecasts(client, keep_days=14)
 
     # ------------------------------------------------------------------

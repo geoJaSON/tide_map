@@ -12,6 +12,7 @@ Usage:
 
 Requires:
     - BlueTopo .tiff files in data/bluetopo/ (run build_vrt.py first)
+    - Fetch raster (4-band GeoTIFF) in data/fetch/
     - Internet access for NOAA and NWS APIs
 """
 
@@ -21,11 +22,14 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import numpy as np
+import rasterio
+from rasterio.transform import from_bounds as transform_from_bounds
 
 from config import (
     BOUNDS,
     TIDE_STATIONS,
-    SETDOWN_COEFF,
+    FETCH_RASTER_PATH,
+    SIBUL_AVG_DEPTH_FT,
     WIND_FORECAST_LAT,
     WIND_FORECAST_LON,
     BLUETOPO_DIR,
@@ -41,10 +45,27 @@ from config import (
 from src.bathymetry import BathymetryGrid
 from src.tides import TideClient
 from src.wind import WindForecastClient
-from src.setdown import WindSetdownModel
+from src.setdown import load_fetch_grids, SibulSetdownModel
 from src.tide_grid import TideGridBuilder
 from src.depth_calc import DepthCalculator
 from src.map_builder import MapBuilder
+
+
+def save_debug_raster(data: np.ndarray, path: str, bounds: dict):
+    """Write a 2D float32 array as a single-band GeoTIFF (EPSG:4326)."""
+    rows, cols = data.shape
+    transform = transform_from_bounds(
+        bounds["west"], bounds["south"],
+        bounds["east"], bounds["north"],
+        cols, rows,
+    )
+    with rasterio.open(
+        path, "w", driver="GTiff",
+        height=rows, width=cols, count=1,
+        dtype="float32", crs="EPSG:4326",
+        transform=transform, compress="deflate",
+    ) as dst:
+        dst.write(data.astype(np.float32), 1)
 
 
 def main():
@@ -59,6 +80,10 @@ def main():
         "--output", type=str, default=None,
         help="Output HTML filename (default: auto-generated with date)",
     )
+    parser.add_argument(
+        "--debug-rasters", action="store_true",
+        help="Save tide, setdown, static depth, and vdatum grids as GeoTIFFs for calibration",
+    )
     args = parser.parse_args()
 
     print("=" * 62)
@@ -68,20 +93,19 @@ def main():
     # ------------------------------------------------------------------
     # Step 1: Load bathymetry
     # ------------------------------------------------------------------
-    print("\n[1/5] Loading bathymetry...")
+    print("\n[1/6] Loading bathymetry...")
     try:
         bathy = BathymetryGrid(BLUETOPO_DIR, BOUNDS, max_dim=MAX_GRID_DIM)
     except FileNotFoundError as e:
         print(f"\n  ERROR: {e}")
         sys.exit(1)
 
-    # Delay static_depth calculation until we build the VDatum offset grid
     print(f"  Grid: {bathy.shape[1]} x {bathy.shape[0]} pixels")
 
     # ------------------------------------------------------------------
     # Step 2: Fetch tide predictions from all stations
     # ------------------------------------------------------------------
-    print("\n[2/5] Fetching tide predictions...")
+    print("\n[2/6] Fetching tide predictions...")
     tides = TideClient(CACHE_DIR)
     now = datetime.now()
 
@@ -107,21 +131,34 @@ def main():
     # ------------------------------------------------------------------
     # Step 2b: Apply VDatum offsets
     # ------------------------------------------------------------------
-    print("\n[2b/5] Building spatial VDatum offset grid...")
+    print("\n[2b/6] Building spatial VDatum offset grid...")
     vdatum_offsets = {sid: info["vdatum_offset"] for sid, info in active_stations.items()}
     vdatum_grid = tide_builder.build_tide_grid(vdatum_offsets)
-    
     static_depth = bathy.get_static_depth_mllw_ft(vdatum_grid)
-    
+
     total_cells = static_depth.size
     nan_cells = np.isnan(static_depth).sum()
     nan_pct = nan_cells / total_cells * 100 if total_cells > 0 else 0
     print(f"  Data coverage: {100 - nan_pct:.0f}%  ({nan_pct:.0f}% no-data)")
 
     # ------------------------------------------------------------------
-    # Step 3: Fetch wind forecast
+    # Step 3: Load fetch raster
     # ------------------------------------------------------------------
-    print("\n[3/5] Fetching wind forecast...")
+    print("\n[3/6] Loading fetch raster...")
+    fetch_path = Path(FETCH_RASTER_PATH)
+    if not fetch_path.exists():
+        print(f"  ERROR: Fetch raster not found: {FETCH_RASTER_PATH}")
+        print(f"  Create a 4-band GeoTIFF (N/E/S/W fetch in feet).")
+        sys.exit(1)
+
+    fetch_grids = load_fetch_grids(str(fetch_path), BOUNDS, bathy.shape)
+    setdown_model = SibulSetdownModel(fetch_grids, avg_depth_ft=SIBUL_AVG_DEPTH_FT)
+    print(f"  Sibul avg depth: {SIBUL_AVG_DEPTH_FT} ft")
+
+    # ------------------------------------------------------------------
+    # Step 4: Fetch wind forecast
+    # ------------------------------------------------------------------
+    print("\n[4/6] Fetching wind forecast...")
     wind_client = WindForecastClient()
     wind_forecast = wind_client.get_hourly_wind_forecast(
         WIND_FORECAST_LAT, WIND_FORECAST_LON
@@ -143,27 +180,20 @@ def main():
         print(f"  Got {len(wind_forecast)} hourly forecasts")
 
     # ------------------------------------------------------------------
-    # Step 4: Calculate wind setdown
-    # ------------------------------------------------------------------
-    print("\n[4/5] Computing wind setdown...")
-    setdown_model = WindSetdownModel(coeff=SETDOWN_COEFF)
-    setdown_series = setdown_model.calculate_setdown_timeseries(wind_forecast)
-
-    if setdown_series:
-        worst = min(setdown_series, key=lambda x: x["setdown_ft"])
-        best = max(setdown_series, key=lambda x: x["setdown_ft"])
-        print(f"  Max setdown:  {worst['setdown_ft']:+.1f} ft at {worst['time'].strftime('%a %I %p')}")
-        print(f"  Max set-up:   {best['setdown_ft']:+.1f} ft at {best['time'].strftime('%a %I %p')}")
-
-    # ------------------------------------------------------------------
     # Step 5: Compute snapshot depth grids and generate map
     # ------------------------------------------------------------------
     hours_label = ", ".join(f"{h}:00" for h in SNAPSHOT_HOURS)
-    print(f"\n[5/5] Generating forecast map (snapshots at {hours_label})...")
-    calculator = DepthCalculator(static_depth, tide_grid_builder=tide_builder)
+    print(f"\n[5/6] Computing depth snapshots ({hours_label})...")
+    calculator = DepthCalculator(
+        static_depth,
+        tide_grid_builder=tide_builder,
+        setdown_model=setdown_model,
+    )
     target_dates = [now + timedelta(days=d) for d in range(args.days)]
     snapshots = calculator.compute_snapshots(
-        multi_preds, setdown_series, target_dates, snapshot_hours=SNAPSHOT_HOURS
+        multi_preds, wind_forecast, target_dates,
+        snapshot_hours=SNAPSHOT_HOURS,
+        save_intermediates=args.debug_rasters,
     )
 
     if not snapshots:
@@ -171,7 +201,10 @@ def main():
         print("  Check that tide predictions and wind forecasts have overlapping dates.")
         sys.exit(1)
 
-    # Build the map
+    # ------------------------------------------------------------------
+    # Step 6: Build map
+    # ------------------------------------------------------------------
+    print(f"\n[6/6] Generating map...")
     grid_bounds = bathy.get_grid_bounds_latlon()
     builder = MapBuilder(MAP_CENTER, MAP_ZOOM)
     m = builder.build_snapshot_map(snapshots, grid_bounds)
@@ -184,6 +217,28 @@ def main():
         out_path = Path(OUTPUT_DIR) / f"depth_forecast_{now.strftime('%Y%m%d')}.html"
 
     builder.save(m, str(out_path))
+
+    # ------------------------------------------------------------------
+    # Debug rasters (optional)
+    # ------------------------------------------------------------------
+    if args.debug_rasters:
+        debug_dir = Path(OUTPUT_DIR) / "debug_rasters"
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        print(f"\n  Saving debug rasters to {debug_dir}/...")
+
+        save_debug_raster(static_depth, str(debug_dir / "static_depth_mllw.tif"), BOUNDS)
+        save_debug_raster(vdatum_grid, str(debug_dir / "vdatum_offset.tif"), BOUNDS)
+
+        for s in snapshots:
+            tag = f"{s['date'].strftime('%Y%m%d')}_{s['hour']:02d}"
+            if "tide_grid" in s:
+                save_debug_raster(s["tide_grid"], str(debug_dir / f"tide_{tag}.tif"), BOUNDS)
+            if "setdown_grid" in s:
+                save_debug_raster(s["setdown_grid"], str(debug_dir / f"setdown_{tag}.tif"), BOUNDS)
+            save_debug_raster(s["depth_grid"], str(debug_dir / f"depth_{tag}.tif"), BOUNDS)
+
+        n_files = 2 + len(snapshots) * 3  # static + vdatum + (tide + setdown + depth) per snap
+        print(f"  Wrote {n_files} GeoTIFFs (EPSG:4326, float32)")
 
     # ------------------------------------------------------------------
     # Print summary table
